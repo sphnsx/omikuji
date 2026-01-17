@@ -1,5 +1,5 @@
 {
-  "name": "像素神社抽籤 - Omikuji Pixel",
-  "description": "精緻的 2D 像素風日式神社抽籤體驗，包含垂直排版簽文與展開動畫。",
+  "name": "Omikuji - Void Shaking",
+  "description": "3D日式神社抽籤體驗。支援手機搖晃感應抽籤，全響應式設計。",
   "requestFramePermissions": []
 }

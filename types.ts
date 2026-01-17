@@ -11,11 +11,11 @@ export enum OmikujiRank {
 }
 
 export enum StallType {
-  TRADITIONAL = 'TRADITIONAL',
-  FISHING = 'FISHING',
-  WATER = 'WATER',
-  FOLDING = 'FOLDING',
-  GOLDEN = 'GOLDEN'
+  TRADITIONAL = '一般',
+  FISHING = '良緣',
+  WATER = '智慧',
+  FOLDING = '事業',
+  GOLDEN = '財富'
 }
 
 export interface OmikujiFortune {
@@ -35,8 +35,6 @@ export interface OmikujiFortune {
 export enum AppState {
   SELECTING = 'SELECTING',
   INTERACTING = 'INTERACTING',
-  SHAKING = 'SHAKING',
-  DRAWING = 'DRAWING',
   SHOWING = 'SHOWING',
   DISSOLVING = 'DISSOLVING'
 }
@@ -45,6 +43,4 @@ export interface GameState {
   status: AppState;
   activeStall: StallType | null;
   currentFortune: OmikujiFortune | null;
-  history: OmikujiFortune[];
-  isMuted: boolean;
 }

@@ -1,129 +1,93 @@
 
 import React from 'react';
 import { AppState, OmikujiFortune, StallType } from '../types';
-import { History, Volume2, VolumeX } from 'lucide-react';
+import { Smartphone } from 'lucide-react';
 
 interface UIOverlayProps {
   status: AppState;
   activeStall: StallType | null;
   currentFortune: OmikujiFortune | null;
   onConfirm: () => void;
-  onReset: () => void;
-  onToggleHistory: () => void;
-  isMuted: boolean;
-  onToggleMute: () => void;
-  historyCount: number;
+  onCancel: () => void;
 }
 
-export const UIOverlay: React.FC<UIOverlayProps> = ({ 
-  status, currentFortune, onConfirm, onToggleHistory, isMuted, onToggleMute, historyCount
-}) => {
-  const isShowing = status === AppState.SHOWING;
-  const isDissolving = status === AppState.DISSOLVING;
+export const UIOverlay: React.FC<UIOverlayProps> = ({ status, activeStall, currentFortune, onConfirm, onCancel }) => {
+  const isInteracting = status === AppState.INTERACTING;
+  const isShowing = status === AppState.SHOWING || status === AppState.DISSOLVING;
 
   return (
-    <div className="absolute inset-0 pointer-events-none flex flex-col justify-between p-12 z-20">
-      {/* Header */}
-      <div className="flex justify-between items-start pointer-events-auto">
-        <div className="flex flex-col gap-3">
-           <h1 className="text-2xl font-extralight text-cyan-50/80 tracking-[0.5em] uppercase">
-              OMI<span className="font-bold">KUJI</span>
-           </h1>
-           <div className="h-[1px] w-16 bg-cyan-400/20 shadow-[0_0_10px_#22d3ee]" />
-        </div>
-        
-        <div className="flex gap-10 items-center text-cyan-200/30">
-          <button onClick={onToggleMute} className="hover:text-cyan-200 transition-colors p-2">
-            {isMuted ? <VolumeX size={16} strokeWidth={1} /> : <Volume2 size={16} strokeWidth={1} />}
-          </button>
-          <button onClick={onToggleHistory} className="hover:text-cyan-200 transition-colors p-2">
-            <History size={16} strokeWidth={1} />
-          </button>
-        </div>
-      </div>
-
-      {/* Prompt */}
-      {status === AppState.SELECTING && (
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <div className="text-cyan-400/10 text-[9px] tracking-[1.5em] animate-pulse uppercase font-light">
-            觸摸幽光之柱以領受簽文
+    <div className="fixed inset-0 pointer-events-none flex items-center justify-center z-50">
+      {isInteracting && (
+        <div className="pointer-events-auto bg-black/90 backdrop-blur-3xl p-6 sm:p-10 flex flex-col items-center border border-white/5 shadow-2xl animate-unfold w-[90vw] max-w-xs">
+          <div className="mb-3 text-[8px] text-white/20 tracking-[0.6em] uppercase">Omikuji Prayer</div>
+          
+          <div className="flex flex-col items-center gap-3 mb-8">
+            <Smartphone className="w-8 h-8 text-white/30 animate-wiggle" />
+            <h2 className="text-lg sm:text-xl font-serif italic tracking-[0.2em] sm:tracking-[0.4em] text-white/95 text-center whitespace-nowrap">
+              「 搖晃手機抽籤 」
+            </h2>
+            <p className="text-[9px] text-white/30 tracking-[0.15em] whitespace-nowrap">或者點擊下方按鈕領取</p>
           </div>
+
+          <button 
+            onClick={onConfirm}
+            className="whitespace-nowrap px-6 py-2 border border-white/10 text-white/80 hover:bg-white/5 tracking-[0.3em] text-[11px] transition-all hover:border-white/30 active:scale-95 shadow-sm"
+          >
+            手動領受
+          </button>
+          
+          <button onClick={onCancel} className="mt-6 text-[9px] text-white/20 tracking-[0.4em] uppercase hover:text-white/50 transition-colors">
+            [ 返回 ]
+          </button>
         </div>
       )}
 
-      {/* Fortune Result Overlay */}
-      {(isShowing || isDissolving) && currentFortune && (
-        <div className="fixed inset-0 flex items-center justify-center bg-[#020205]/95 pointer-events-auto z-50 p-6 backdrop-blur-sm">
-          <div className={`flex flex-col items-center w-full max-w-2xl ${isDissolving ? 'animate-dissolve' : ''}`}>
+      {isShowing && currentFortune && (
+        <div className={`pointer-events-auto fixed inset-0 flex items-center justify-center bg-black/98 p-4 sm:p-6 overflow-hidden ${status === AppState.DISSOLVING ? 'animate-dissolve' : ''}`}>
+          <div className="bg-[#06050a] border border-white/5 p-6 sm:p-16 w-full max-w-2xl h-full max-h-[90vh] sm:h-auto animate-unfold relative shadow-[0_0_150px_rgba(255,100,200,0.05)] flex flex-col">
             
-            <div className="bg-[#050508] border border-cyan-900/50 p-16 shadow-[0_0_100px_rgba(0,0,0,1)] animate-unfold relative overflow-hidden">
-              {/* Subtle Noise/Grain on paper */}
-              <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[url('https://grainy-gradients.vercel.app/noise.svg')] bg-repeat" />
-              
-              <div className="flex flex-row-reverse justify-between h-[55vh] gap-16 relative z-10">
-                {/* Main Rank Section */}
-                <div className="flex flex-col items-center border-l border-cyan-900/30 pl-10">
-                  <div className="vertical-text text-5xl font-black text-cyan-50 mb-10 tracking-[0.2em] [text-shadow:0_0_20px_rgba(255,255,255,0.2)]">
-                    {currentFortune.rank}
-                  </div>
-                  <div className="vertical-text text-lg font-light leading-relaxed text-cyan-100/80 max-h-[300px] overflow-hidden">
-                    {currentFortune.summary}
-                  </div>
-                </div>
-
-                {/* Categories */}
-                <div className="flex flex-row-reverse gap-8">
-                  {[
-                    { label: '前程', val: currentFortune.career },
-                    { label: '智慧', val: currentFortune.academic },
-                    { label: '緣分', val: currentFortune.love },
-                    { label: '豐盛', val: currentFortune.finance }
-                  ].map((item, idx) => (
-                    <div key={idx} className="flex flex-col items-center">
-                      <span className="vertical-text text-[9px] text-cyan-400/40 mb-8 tracking-[0.5em] font-bold uppercase">
-                        {item.label}
-                      </span>
-                      <span className="vertical-text text-[10px] text-cyan-50/60 leading-relaxed font-light">
-                        {item.val}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Divine Message */}
-                <div className="flex flex-col items-center border-r border-cyan-900/30 pr-10 justify-center">
-                  <span className="vertical-text italic text-cyan-400/20 text-[11px] leading-[2] tracking-widest">
-                    「 {currentFortune.divineMessage} 」
-                  </span>
-                </div>
+            <div className="flex flex-row-reverse justify-between flex-1 gap-4 sm:gap-12 overflow-x-auto pb-4 scrollbar-hide">
+              {/* Main Rank Section */}
+              <div className="flex flex-col items-center border-l border-white/5 pl-4 sm:pl-10 shrink-0">
+                <div className="vertical-text text-5xl sm:text-7xl font-black text-white/95 mb-6 sm:mb-10 tracking-[0.1em]">{currentFortune.rank}</div>
+                <div className="vertical-text text-[10px] sm:text-sm font-medium text-white/60 tracking-[0.2em] sm:tracking-[0.3em]">{currentFortune.summary}</div>
               </div>
 
-              {/* Minimalist Signature Seal */}
-              <div className="absolute bottom-16 right-16 w-10 h-10 border border-cyan-400/10 flex items-center justify-center text-[8px] text-cyan-400/20 vertical-text font-black uppercase tracking-tighter">
-                Ethereal
+              {/* Detail Sections - Row of vertical text */}
+              <div className="flex flex-row-reverse gap-4 sm:gap-8 flex-1 justify-center shrink-0">
+                {[
+                  { label: '事業', value: currentFortune.career },
+                  { label: '學問', value: currentFortune.academic },
+                  { label: '姻緣', value: currentFortune.love },
+                  { label: '財運', value: currentFortune.finance },
+                  { label: '健康', value: currentFortune.health }
+                ].map((item, i) => (
+                  <div key={i} className="flex flex-col items-center min-w-[20px]">
+                    <span className="vertical-text text-[8px] sm:text-[9px] text-white/20 mb-4 sm:mb-8 font-bold opacity-60 uppercase">{item.label}</span>
+                    <span className="vertical-text text-[10px] sm:text-[11px] text-white/70 font-light leading-relaxed">{item.value}</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Divine Message */}
+              <div className="hidden sm:flex flex-col items-center justify-center opacity-30 shrink-0">
+                <div className="vertical-text italic text-white/80 text-[11px] tracking-[0.6em] leading-loose">
+                  「 {currentFortune.divineMessage} 」
+                </div>
               </div>
             </div>
-
-            {!isDissolving && (
+            
+            <div className="mt-6 sm:mt-16">
               <button 
                 onClick={onConfirm}
-                className="mt-20 px-24 py-5 border border-cyan-400/20 text-cyan-400 hover:bg-cyan-400 hover:text-black transition-all tracking-[1.2em] font-light text-xs bg-black/40 uppercase"
+                className="w-full py-4 sm:py-5 border border-white/10 text-white/40 hover:text-white hover:border-white/30 tracking-[1em] sm:tracking-[1.5em] text-[10px] uppercase transition-all"
               >
-                領受此運
+                歸於塵煙
               </button>
-            )}
+            </div>
           </div>
         </div>
       )}
-
-      {/* Footer Details */}
-      <div className="flex justify-between items-end pointer-events-auto">
-        <div className="text-[8px] text-cyan-300/10 tracking-[0.4em] uppercase flex flex-col gap-2 font-mono">
-          <span>COORDS: 35.689°N 139.692°E</span>
-          <span>RESONATED_FORTUNES: {historyCount}</span>
-        </div>
-        <div className="w-24 h-[1px] bg-cyan-400/5" />
-      </div>
     </div>
   );
 };
