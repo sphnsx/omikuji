@@ -1,20 +1,36 @@
-
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Omikuji - 幽冥冥河之櫻</title>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>Omikuji — 影暗し</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@200;500;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@200;300;400;500;600;700;900&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            serif: ['"Noto Serif TC"', 'Songti SC', 'PMingLiU', 'Georgia', 'serif'],
+            sans: ['"Noto Serif TC"', 'Songti SC', 'PMingLiU', 'Georgia', 'serif'],
+          },
+        },
+      },
+    }
+  </script>
   <style>
     :root {
       --bg-void: #020108;
       --bg-purple: #08051a;
     }
+    /* Global Font Force */
     * {
       touch-action: manipulation;
       -webkit-tap-highlight-color: transparent;
+      font-family: "Noto Serif TC", "Songti SC", "PMingLiU", "Georgia", serif !important;
     }
     body {
       margin: 0;
@@ -22,7 +38,6 @@
       overflow: hidden;
       background: radial-gradient(circle at center, var(--bg-purple) 0%, var(--bg-void) 80%);
       color: #fce7f3;
-      font-family: 'Noto Serif TC', serif;
       width: 100vw;
       height: 100vh;
       position: fixed;
@@ -30,9 +45,6 @@
     #root {
       width: 100%;
       height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
     }
     .vertical-text {
       writing-mode: vertical-rl;
@@ -57,16 +69,22 @@
       to { opacity: 0; filter: blur(40px); transform: scale(1.05); }
     }
     .animate-dissolve {
-      animation: dissolve 1s ease-in forwards;
+      animation: dissolve 1.2s ease-in forwards;
     }
-    /* Simple shake animation for instructions */
     @keyframes wiggle {
       0%, 100% { transform: rotate(0deg); }
-      25% { transform: rotate(-5deg); }
-      75% { transform: rotate(5deg); }
+      25% { transform: rotate(-8deg); }
+      75% { transform: rotate(8deg); }
     }
     .animate-wiggle {
-      animation: wiggle 0.5s ease-in-out infinite;
+      animation: wiggle 0.6s ease-in-out infinite;
+    }
+    .scrollbar-hide::-webkit-scrollbar {
+      display: none;
+    }
+    .scrollbar-hide {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
     }
   </style>
 <script type="importmap">
@@ -81,7 +99,8 @@
     "@react-three/drei": "https://esm.sh/@react-three/drei@9.121.0?external=react,react-dom,three,@react-three/fiber",
     "lucide-react": "https://esm.sh/lucide-react@0.460.0?external=react",
     "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
-    "react/": "https://esm.sh/react@^19.2.3/"
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "@google/genai": "https://esm.sh/@google/genai@^1.37.0"
   }
 }
 </script>

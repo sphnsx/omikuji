@@ -1,5 +1,5 @@
 {
-  "name": "omikuji---void-shaking",
+  "name": "omikuji",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -14,7 +14,8 @@
     "three": "0.170.0",
     "@react-three/fiber": "9.0.0-rc.0",
     "@react-three/drei": "9.121.0",
-    "lucide-react": "0.460.0"
+    "lucide-react": "0.460.0",
+    "@google/genai": "^1.37.0"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",

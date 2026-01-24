@@ -1,5 +1,6 @@
 {
-  "name": "Omikuji - Void Shaking",
-  "description": "3D日式神社抽籤體驗。支援手機搖晃感應抽籤，全響應式設計。",
+  "name": "OMIKUJI",
+  "version": "1.0.1",
+  "description": "夜桜や 宮の御神の 影暗し",
   "requestFramePermissions": []
 }

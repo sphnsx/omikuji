@@ -1,27 +1,32 @@
+import { OmikujiFortune, StallType } from '../types';
+import { FORTUNES } from '../data/fortunes';
 
-import { OmikujiFortune, OmikujiRank, StallType } from '../types';
-import { RANK_WEIGHTS, FORTUNE_TEXTS } from '../constants';
-
+/**
+ * Generates a fortune exclusively from the high-quality philosophical pool.
+ * Ensure data consistency by strictly importing from data/fortunes.ts.
+ */
 export const generateFortune = (stallType: StallType): OmikujiFortune => {
-  const rand = Math.random();
-  let cumulative = 0;
-  let selectedRank = OmikujiRank.KICHI;
-
-  for (const [rank, weight] of Object.entries(RANK_WEIGHTS)) {
-    cumulative += weight;
-    if (rand <= cumulative) {
-      selectedRank = rank as OmikujiRank;
-      break;
-    }
+  if (!FORTUNES || FORTUNES.length === 0) {
+    throw new Error("Fortune pool is empty or not loaded.");
   }
 
-  const template = FORTUNE_TEXTS[stallType];
+  const randomIndex = Math.floor(Math.random() * FORTUNES.length);
+  const selectedEntry = FORTUNES[randomIndex];
+
+  // Append a high-entropy suffix to the ID to ensure fresh rendering and avoid build-stale states
+  const uniqueId = `OM-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substr(2, 4).toUpperCase()}`;
 
   return {
-    id: Math.random().toString(36).substr(2, 9).toUpperCase(),
-    rank: selectedRank,
+    id: uniqueId,
+    rank: selectedEntry.rank,
+    summary: selectedEntry.summary,
+    divineMessage: selectedEntry.divineMessage,
+    career: selectedEntry.career,
+    academic: selectedEntry.academic,
+    love: selectedEntry.love,
+    health: selectedEntry.health,
+    finance: selectedEntry.finance,
     timestamp: Date.now(),
-    stallType,
-    ...template
+    stallType
   };
 };
