@@ -164,8 +164,10 @@ export const UIOverlay: React.FC<UIOverlayProps> = ({
                       font-serif text-xl text-stone-100 
                       [writing-mode:vertical-rl] [text-orientation:mixed] 
                       tracking-[0.45em] leading-[2.5] 
-                      max-h-[50vh] overflow-x-visible overflow-y-auto scrollbar-hide
+                      max-h-[50vh] overflow-hidden
                       break-words whitespace-normal w-[120px] sm:w-[280px] shrink-0
+                      columns-2 sm:columns-3 gap-8
+                      pr-[1em] sm:pr-[1.2em]
                     ">
                       {currentFortune.divineMessage}
                     </div>
