@@ -147,25 +147,29 @@ export const UIOverlay: React.FC<UIOverlayProps> = ({
                     </button>
                   </div>
 
-                  {/* 神諭內容 - 動態寬度防重疊，頂端對齊 */}
-                  {isDivineVisible && (
-                    <div className="flex flex-col items-center justify-start h-full gap-8 shrink-0 border-l border-white/10 pl-10 sm:pl-16 animate-unfold min-w-[120px] sm:min-w-[280px]">
-                      <div className="flex flex-col items-center font-serif text-xs text-stone-400 tracking-widest opacity-60">
-                        <span>神</span>
-                        <span className="mt-1">諭</span>
-                      </div>
-                      <div className="w-[1px] h-10 bg-stone-700 opacity-40 shrink-0"></div>
-                      <div className="
-                        font-serif text-xl text-stone-100 
-                        [writing-mode:vertical-rl] [text-orientation:mixed] 
-                        tracking-[0.45em] leading-[2.5] 
-                        max-h-[55vh] overflow-x-visible overflow-y-hidden
-                        break-words whitespace-normal
-                      ">
-                        {currentFortune.divineMessage}
-                      </div>
+                  {/* 神諭內容 - 寬度/透明度過渡，避免點擊瞬間重疊 */}
+                  <div
+                    className={`flex flex-col items-center justify-start h-full gap-8 shrink-0 border-l border-white/10 pl-10 sm:pl-16 overflow-hidden transition-all duration-300 ease-out ${
+                      isDivineVisible
+                        ? 'min-w-[120px] sm:min-w-[280px] max-w-[120px] sm:max-w-[280px] opacity-100'
+                        : 'min-w-0 max-w-0 opacity-0 pl-0 border-l-0'
+                    }`}
+                  >
+                    <div className="flex flex-col items-center font-serif text-xs text-stone-400 tracking-widest opacity-60 shrink-0 w-[120px] sm:w-[280px]">
+                      <span>神</span>
+                      <span className="mt-1">諭</span>
                     </div>
-                  )}
+                    <div className="w-[1px] h-10 bg-stone-700 opacity-40 shrink-0"></div>
+                    <div className="
+                      font-serif text-xl text-stone-100 
+                      [writing-mode:vertical-rl] [text-orientation:mixed] 
+                      tracking-[0.45em] leading-[2.5] 
+                      max-h-[55vh] overflow-x-visible overflow-y-hidden
+                      break-words whitespace-normal w-[120px] sm:w-[280px] shrink-0
+                    ">
+                      {currentFortune.divineMessage}
+                    </div>
+                  </div>
                 </div>
 
                 {/* 4. Categories Grid (五大運勢) - 頂端對齊、灰字略淺 */}
