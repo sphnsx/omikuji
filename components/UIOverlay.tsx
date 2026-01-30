@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { AppState, OmikujiFortune, StallType } from '../types';
-import { Smartphone, ChevronRight, Eye, EyeOff } from 'lucide-react';
+import { Smartphone, ChevronRight, ChevronLeft, Eye, EyeOff } from 'lucide-react';
 
 interface UIOverlayProps {
   status: AppState;
@@ -19,6 +19,7 @@ export const UIOverlay: React.FC<UIOverlayProps> = ({
 }) => {
   const [showDivine] = useState(false); // Note: Original code used a state, but for the sake of the requested UI fix, I'll ensure the button/text logic is robust
   const [isDivineVisible, setIsDivineVisible] = useState(false);
+  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const isInteracting = status === AppState.INTERACTING;
   const isShowing = status === AppState.SHOWING || status === AppState.DISSOLVING;
 
@@ -26,6 +27,17 @@ export const UIOverlay: React.FC<UIOverlayProps> = ({
   useEffect(() => {
     if (status === AppState.SHOWING) {
       setIsDivineVisible(false);
+    }
+  }, [status, currentFortune?.id]);
+
+  // 右滑看詳解：初始滾動到最右（顯示摘要），詳解在左側
+  useEffect(() => {
+    if (status === AppState.SHOWING && currentFortune && scrollContainerRef.current) {
+      const el = scrollContainerRef.current;
+      const scrollToRight = () => {
+        el.scrollLeft = el.scrollWidth - el.clientWidth;
+      };
+      requestAnimationFrame(scrollToRight);
     }
   }, [status, currentFortune?.id]);
 
@@ -82,28 +94,11 @@ export const UIOverlay: React.FC<UIOverlayProps> = ({
       {/* 籤文卡片 (Result Screen) */}
       {isShowing && currentFortune && (
         <div 
+          ref={scrollContainerRef}
           className={`pointer-events-auto fixed inset-0 flex flex-row overflow-x-auto snap-x snap-mandatory scrollbar-hide bg-black/98 transition-all duration-1000 ${status === AppState.DISSOLVING ? 'animate-dissolve' : 'animate-unfold'}`}
         >
           
-          {/* SLIDE 1: THE MYSTERY (RANK & SUMMARY) */}
-          <section className="min-w-full h-full flex flex-col items-center justify-center snap-center px-4 sm:px-12 relative overflow-hidden">
-            <div className="flex flex-row-reverse items-center justify-center gap-6 sm:gap-20 w-full max-w-5xl">
-              <div className="[writing-mode:vertical-rl] [text-orientation:upright] text-[9rem] sm:text-[14rem] font-black font-serif text-white leading-none tracking-[0.1em] opacity-90 drop-shadow-[0_0_60px_rgba(255,255,255,0.1)] select-none shrink-0">
-                {currentFortune.rank}
-              </div>
-              <div className="max-h-[60vh] [writing-mode:vertical-rl] [text-orientation:upright] text-stone-400 tracking-[0.5em] font-serif text-sm sm:text-xl leading-relaxed border-l border-white/5 pl-6 sm:pl-16 opacity-70 flex-shrink">
-                {currentFortune.summary}
-              </div>
-            </div>
-            <div className="absolute bottom-10 left-0 right-0 flex flex-col items-center gap-2 animate-pulse pointer-events-none">
-              <div className="bg-black/40 backdrop-blur-sm px-6 py-2 rounded-full border border-white/5">
-                <div className="text-[10px] tracking-[1em] text-white/50 font-light pl-[1em]">左滑揭示詳解</div>
-              </div>
-              <ChevronRight className="w-5 h-5 text-white/30" />
-            </div>
-          </section>
-
-          {/* SLIDE 2: THE REVELATION (DETAILED VIEW) */}
+          {/* SLIDE 2: THE REVELATION (DETAILED VIEW) - 左側，右滑進入 */}
           <section className="min-w-full h-full flex items-center justify-center snap-center p-4 sm:p-12">
             <div className="bg-[#08080c] border border-white/5 p-6 sm:px-20 sm:py-16 w-full max-w-[95vw] h-full max-h-[92vh] relative shadow-[0_0_150px_rgba(255,255,255,0.02)] flex flex-col overflow-hidden">
               
@@ -117,29 +112,29 @@ export const UIOverlay: React.FC<UIOverlayProps> = ({
                   </div>
                 </div>
 
-                {/* 2. Summary Column (解卦) - 物理豎排標籤 */}
+                {/* 2. Summary Column (解卦) - 物理豎排標籤，頂端對齊 */}
                 <div className="flex flex-col items-center justify-start h-full gap-8 shrink-0 border-l border-white/10 pl-10 sm:pl-16">
-                  <div className="flex flex-col items-center font-serif text-xs text-stone-600 tracking-widest opacity-40">
+                  <div className="flex flex-col items-center font-serif text-xs text-stone-500 tracking-widest opacity-50">
                     <span>解</span>
                     <span className="mt-1">卦</span>
                   </div>
-                  <div className="w-[1px] h-10 bg-stone-800 opacity-30"></div>
-                  <div className="font-serif text-xl text-stone-400 [writing-mode:vertical-rl] [text-orientation:upright] tracking-[0.5em] leading-relaxed max-h-[60vh] overflow-y-auto scrollbar-hide">
+                  <div className="w-[1px] h-10 bg-stone-700 opacity-40 shrink-0"></div>
+                  <div className="font-serif text-xl text-stone-300 [writing-mode:vertical-rl] [text-orientation:upright] tracking-[0.5em] leading-relaxed max-h-[60vh] overflow-y-auto scrollbar-hide">
                     {currentFortune.summary}
                   </div>
                 </div>
 
-                {/* 3. Divine Message Section (神諭) - 按鈕絕對居中 */}
-                <div className="flex flex-row-reverse items-start gap-16 sm:gap-28 h-full shrink-0">
+                {/* 3. Divine Message Section (神諭) - 按鈕縱向居中 */}
+                <div className="flex flex-row-reverse items-center gap-16 sm:gap-28 h-full shrink-0">
                   
-                  {/* 按鈕容器 - 確保在模塊中軸線 */}
-                  <div className="h-full flex flex-col justify-start items-center shrink-0">
+                  {/* 按鈕容器 - 對話框內縱向居中 */}
+                  <div className="h-full flex flex-col justify-center items-center shrink-0">
                     <button 
                       onClick={() => setIsDivineVisible(!isDivineVisible)}
                       className={`
                         w-16 sm:w-24 py-16 flex flex-col items-center justify-center gap-10
                         border transition-all duration-700
-                        ${isDivineVisible ? 'border-white/20 text-white/80 bg-white/5 shadow-[0_0_30px_rgba(255,255,255,0.05)]' : 'border-white/5 text-white/15 hover:text-white/40 hover:border-white/10'}
+                        ${isDivineVisible ? 'border-white/20 text-white/80 bg-white/5 shadow-[0_0_30px_rgba(255,255,255,0.05)]' : 'border-white/10 text-white/25 hover:text-white/40 hover:border-white/15'}
                       `}
                     >
                       <div className="flex flex-col items-center font-serif text-sm tracking-[1em]">
@@ -152,16 +147,16 @@ export const UIOverlay: React.FC<UIOverlayProps> = ({
                     </button>
                   </div>
 
-                  {/* 神諭內容 - 動態寬度防重疊 */}
+                  {/* 神諭內容 - 動態寬度防重疊，頂端對齊 */}
                   {isDivineVisible && (
                     <div className="flex flex-col items-center justify-start h-full gap-8 shrink-0 border-l border-white/10 pl-10 sm:pl-16 animate-unfold min-w-[120px] sm:min-w-[280px]">
-                      <div className="flex flex-col items-center font-serif text-xs text-stone-500 tracking-widest opacity-60">
+                      <div className="flex flex-col items-center font-serif text-xs text-stone-400 tracking-widest opacity-60">
                         <span>神</span>
                         <span className="mt-1">諭</span>
                       </div>
-                      <div className="w-[1px] h-12 bg-stone-800 opacity-40"></div>
+                      <div className="w-[1px] h-10 bg-stone-700 opacity-40 shrink-0"></div>
                       <div className="
-                        font-serif text-xl text-stone-200 
+                        font-serif text-xl text-stone-100 
                         [writing-mode:vertical-rl] [text-orientation:mixed] 
                         tracking-[0.45em] leading-[2.5] 
                         max-h-[55vh] overflow-x-visible overflow-y-hidden
@@ -173,7 +168,7 @@ export const UIOverlay: React.FC<UIOverlayProps> = ({
                   )}
                 </div>
 
-                {/* 4. Categories Grid (五大運勢) - 增大間距與自動換列 */}
+                {/* 4. Categories Grid (五大運勢) - 頂端對齊、灰字略淺 */}
                 <div className="flex flex-row-reverse justify-start items-start gap-16 sm:gap-24 h-full py-0 shrink-0 overflow-x-visible">
                   {[
                     { label: '事業', value: currentFortune.career },
@@ -183,13 +178,13 @@ export const UIOverlay: React.FC<UIOverlayProps> = ({
                     { label: '健康', value: currentFortune.health }
                   ].map((item) => (
                     <div key={item.label} className="flex flex-col items-center justify-start h-full gap-8 group shrink-0 min-w-fit">
-                      <div className="flex flex-col items-center font-serif text-xs text-stone-600 tracking-widest opacity-40 group-hover:text-white/70 transition-colors">
+                      <div className="flex flex-col items-center font-serif text-xs text-stone-500 tracking-widest opacity-50 group-hover:text-white/70 transition-colors">
                         <span>{item.label[0]}</span>
                         <span className="mt-1">{item.label[1]}</span>
                       </div>
-                      <div className="w-[1px] h-10 bg-stone-900 group-hover:bg-stone-700 transition-colors"></div>
+                      <div className="w-[1px] h-10 bg-stone-700 opacity-40 shrink-0 group-hover:bg-stone-600 transition-colors"></div>
                       <div className="
-                          font-serif text-lg text-stone-400 
+                          font-serif text-lg text-stone-300 
                           [writing-mode:vertical-rl] [text-orientation:mixed] 
                           tracking-[0.3em] leading-[2.6]
                           max-h-[55vh] overflow-x-visible overflow-y-hidden
@@ -206,11 +201,29 @@ export const UIOverlay: React.FC<UIOverlayProps> = ({
               <div className="mt-10 sm:mt-12 shrink-0 border-t border-white/5 pt-8">
                 <button 
                   onClick={onConfirm}
-                  className="w-full py-8 sm:py-10 border border-white/5 text-stone-700 hover:text-white/60 hover:bg-white/5 tracking-[4em] text-[10px] uppercase transition-all duration-1000 pl-[4em] flex items-center justify-center text-center rounded-sm"
+                  className="w-full py-8 sm:py-10 border border-white/5 text-stone-500 hover:text-white/60 hover:bg-white/5 tracking-[4em] text-[10px] uppercase transition-all duration-1000 pl-[4em] flex items-center justify-center text-center rounded-sm"
                 >
                   歸於虛無
                 </button>
               </div>
+            </div>
+          </section>
+
+          {/* SLIDE 1: THE MYSTERY (RANK & SUMMARY) - 右側，初始顯示 */}
+          <section className="min-w-full h-full flex flex-col items-center justify-center snap-center px-4 sm:px-12 relative overflow-hidden">
+            <div className="flex flex-row-reverse items-center justify-center gap-6 sm:gap-20 w-full max-w-5xl">
+              <div className="[writing-mode:vertical-rl] [text-orientation:upright] text-[9rem] sm:text-[14rem] font-black font-serif text-white leading-none tracking-[0.1em] opacity-90 drop-shadow-[0_0_60px_rgba(255,255,255,0.1)] select-none shrink-0">
+                {currentFortune.rank}
+              </div>
+              <div className="max-h-[60vh] [writing-mode:vertical-rl] [text-orientation:upright] text-stone-300 tracking-[0.5em] font-serif text-sm sm:text-xl leading-relaxed border-l border-white/5 pl-6 sm:pl-16 opacity-80 flex-shrink">
+                {currentFortune.summary}
+              </div>
+            </div>
+            <div className="absolute bottom-10 left-0 right-0 flex flex-col items-center gap-2 animate-pulse pointer-events-none">
+              <div className="bg-black/40 backdrop-blur-sm px-6 py-2 rounded-full border border-white/5">
+                <div className="text-[10px] tracking-[1em] text-white/50 font-light pl-[1em]">右滑揭示詳解</div>
+              </div>
+              <ChevronLeft className="w-5 h-5 text-white/30" />
             </div>
           </section>
 
