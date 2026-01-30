@@ -132,16 +132,16 @@ export const UIOverlay: React.FC<UIOverlayProps> = ({
                     <button 
                       onClick={() => setIsDivineVisible(!isDivineVisible)}
                       className={`
-                        w-16 sm:w-24 py-16 px-4 sm:px-6 flex flex-col items-center justify-center gap-10
+                        w-16 sm:w-24 py-16 flex flex-col items-center justify-center gap-10
                         border transition-all duration-700
                         ${isDivineVisible ? 'border-white/20 text-white/80 bg-white/5 shadow-[0_0_30px_rgba(255,255,255,0.05)]' : 'border-white/10 text-white/25 hover:text-white/40 hover:border-white/15'}
                       `}
                     >
-                      <div className="flex flex-col items-center justify-center font-serif text-sm tracking-[1em] w-full">
+                      <div className="flex flex-col items-center font-serif text-sm tracking-[1em] translate-x-2">
                         <span>{isDivineVisible ? "收" : "詳"}</span>
                         <span className="mt-2">{isDivineVisible ? "起" : "解"}</span>
                       </div>
-                      <div className="opacity-40 flex justify-center w-full">
+                      <div className="opacity-40">
                         {isDivineVisible ? <EyeOff size={20} /> : <Eye size={20} />}
                       </div>
                     </button>
