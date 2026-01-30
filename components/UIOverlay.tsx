@@ -99,11 +99,11 @@ export const UIOverlay: React.FC<UIOverlayProps> = ({
         >
           
           {/* SLIDE 2: THE REVELATION (DETAILED VIEW) - 左側，右滑進入 */}
-          <section className="min-w-full h-full flex items-center justify-center snap-center p-4 sm:p-12">
-            <div className="bg-[#08080c] border border-white/5 p-6 sm:px-20 sm:py-16 w-full max-w-[95vw] h-full max-h-[92vh] relative shadow-[0_0_150px_rgba(255,255,255,0.02)] flex flex-col overflow-hidden">
+          <section className="min-w-full h-full flex items-center justify-center snap-center p-3 sm:p-12">
+            <div className="bg-[#08080c] border border-white/5 p-4 sm:px-20 sm:py-16 w-full max-w-[98vw] h-full max-h-[90dvh] relative shadow-[0_0_150px_rgba(255,255,255,0.02)] flex flex-col overflow-x-hidden overflow-y-auto scrollbar-hide min-h-0">
               
-              {/* Main Content Area - Horizontal Scrollable for narrow screens */}
-              <div className="flex flex-row-reverse justify-start flex-1 gap-16 sm:gap-24 overflow-x-auto overflow-y-hidden pb-4 scrollbar-hide mt-12 sm:mt-4 items-start px-4">
+              {/* Main Content Area - 左右留白，橫向可滾動 */}
+              <div className="flex flex-row-reverse justify-start flex-1 min-h-0 gap-16 sm:gap-24 overflow-x-auto overflow-y-hidden pb-4 scrollbar-hide mt-12 sm:mt-4 items-start pl-8 pr-8 sm:pl-10 sm:pr-10">
                 
                 {/* 1. Rank Column */}
                 <div className="flex flex-col items-center justify-start shrink-0 border-l border-white/10 pl-10 sm:pl-16 h-full">
@@ -164,7 +164,7 @@ export const UIOverlay: React.FC<UIOverlayProps> = ({
                       font-serif text-xl text-stone-100 
                       [writing-mode:vertical-rl] [text-orientation:mixed] 
                       tracking-[0.45em] leading-[2.5] 
-                      max-h-[55vh] overflow-x-visible overflow-y-hidden
+                      max-h-[50vh] overflow-x-visible overflow-y-auto scrollbar-hide
                       break-words whitespace-normal w-[120px] sm:w-[280px] shrink-0
                     ">
                       {currentFortune.divineMessage}
@@ -191,7 +191,7 @@ export const UIOverlay: React.FC<UIOverlayProps> = ({
                           font-serif text-lg text-stone-300 
                           [writing-mode:vertical-rl] [text-orientation:mixed] 
                           tracking-[0.3em] leading-[2.6]
-                          max-h-[55vh] overflow-x-visible overflow-y-hidden
+                          max-h-[50vh] overflow-x-visible overflow-y-auto scrollbar-hide
                           flex-grow whitespace-normal break-words
                       ">
                         {item.value}
@@ -201,8 +201,8 @@ export const UIOverlay: React.FC<UIOverlayProps> = ({
                 </div>
               </div>
               
-              {/* Bottom Return Button */}
-              <div className="mt-10 sm:mt-12 shrink-0 border-t border-white/5 pt-8">
+              {/* Bottom Return Button - 底部留足安全區與留白 */}
+              <div className="mt-10 sm:mt-12 shrink-0 border-t border-white/5 pt-8 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
                 <button 
                   onClick={onConfirm}
                   className="w-full py-8 sm:py-10 border border-white/5 text-stone-500 hover:text-white/60 hover:bg-white/5 tracking-[4em] text-[10px] uppercase transition-all duration-1000 pl-[4em] flex items-center justify-center text-center rounded-sm"
