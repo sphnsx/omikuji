@@ -137,7 +137,7 @@ export const UIOverlay: React.FC<UIOverlayProps> = ({
                         ${isDivineVisible ? 'border-white/20 text-white/80 bg-white/5 shadow-[0_0_30px_rgba(255,255,255,0.05)]' : 'border-white/10 text-white/25 hover:text-white/40 hover:border-white/15'}
                       `}
                     >
-                      <div className="flex flex-col items-center font-serif text-sm tracking-[1em] translate-x-1.5">
+                      <div className="flex flex-col items-center font-serif text-sm tracking-[1em] translate-x-1.7">
                         <span>{isDivineVisible ? "收" : "詳"}</span>
                         <span className="mt-2">{isDivineVisible ? "起" : "解"}</span>
                       </div>
