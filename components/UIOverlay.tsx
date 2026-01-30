@@ -147,27 +147,25 @@ export const UIOverlay: React.FC<UIOverlayProps> = ({
                     </button>
                   </div>
 
-                  {/* 神諭內容 - 寬度/透明度過渡，避免點擊瞬間重疊 */}
+                  {/* 神諭內容 - 與五大運勢同格式：標籤 + 分隔線 + 可滾動正文 */}
                   <div
                     className={`flex flex-col items-center justify-start h-full gap-8 shrink-0 border-l border-white/10 pl-10 sm:pl-16 overflow-hidden transition-all duration-300 ease-out ${
                       isDivineVisible
-                        ? 'min-w-[120px] sm:min-w-[280px] max-w-[120px] sm:max-w-[280px] opacity-100'
+                        ? 'min-w-fit max-w-none opacity-100'
                         : 'min-w-0 max-w-0 opacity-0 pl-0 border-l-0'
                     }`}
                   >
-                    <div className="flex flex-col items-center font-serif text-xs text-stone-400 tracking-widest opacity-60 shrink-0 w-[120px] sm:w-[280px]">
+                    <div className="flex flex-col items-center font-serif text-xs text-stone-500 tracking-widest opacity-50 shrink-0">
                       <span>神</span>
                       <span className="mt-1">諭</span>
                     </div>
-                    <div className="w-[1px] h-10 bg-stone-700 opacity-40 shrink-0"></div>
+                    <div className="w-[1px] h-10 bg-stone-700 opacity-40 shrink-0 group-hover:bg-stone-600 transition-colors"></div>
                     <div className="
-                      font-serif text-xl text-stone-100 
+                      font-serif text-lg text-stone-300 
                       [writing-mode:vertical-rl] [text-orientation:mixed] 
-                      tracking-[0.45em] leading-[2.5] 
-                      max-h-[50vh] overflow-hidden
-                      break-words whitespace-normal w-[120px] sm:w-[280px] shrink-0
-                      columns-2 sm:columns-3 gap-8
-                      pr-[1em] sm:pr-[1.2em]
+                      tracking-[0.3em] leading-[2.6]
+                      max-h-[50vh] overflow-x-visible overflow-y-auto scrollbar-hide
+                      flex-grow whitespace-normal break-words
                     ">
                       {currentFortune.divineMessage}
                     </div>
