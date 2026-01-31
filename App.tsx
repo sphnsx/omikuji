@@ -7,6 +7,45 @@ import { UIOverlay } from './components/UIOverlay';
 // 正式版變量設定
 const SHAKE_THRESHOLD = 20; 
 
+// 工具函數：檢測平台類型
+const detectPlatform = (): 'ios' | 'android' | 'desktop' => {
+  const ua = navigator.userAgent;
+  if (/iPhone|iPad|iPod/i.test(ua)) return 'ios';
+  if (/Android/i.test(ua)) return 'android';
+  return 'desktop';
+};
+
+// 工具函數：檢查是否有運動權限 API
+const hasMotionPermissionAPI = (): boolean => {
+  return typeof (DeviceMotionEvent as any).requestPermission === 'function';
+};
+
+// 工具函數：測試運動傳感器是否可用
+const testMotionSensor = (): Promise<boolean> => {
+  return new Promise((resolve) => {
+    let resolved = false;
+    
+    const handler = (event: DeviceMotionEvent) => {
+      if (!resolved && event.accelerationIncludingGravity) {
+        resolved = true;
+        window.removeEventListener('devicemotion', handler);
+        resolve(true);
+      }
+    };
+    
+    window.addEventListener('devicemotion', handler);
+    
+    // 1秒超時
+    setTimeout(() => {
+      if (!resolved) {
+        resolved = true;
+        window.removeEventListener('devicemotion', handler);
+        resolve(false);
+      }
+    }, 1000);
+  });
+};
+
 const App: React.FC = () => {
   const [gameState, setGameState] = useState<GameState>({
     status: AppState.SELECTING,
@@ -15,6 +54,9 @@ const App: React.FC = () => {
   });
   
   const [isShaking, setIsShaking] = useState(false);
+  const [platform, setPlatform] = useState<'ios' | 'android' | 'desktop'>('desktop');
+  const [sensorAvailable, setSensorAvailable] = useState<boolean | null>(null);
+  const [showPermissionGuide, setShowPermissionGuide] = useState(false);
 
   // 搖晃狀態 Refs
   const lastX = useRef(0);
@@ -103,8 +145,13 @@ const App: React.FC = () => {
     return () => window.removeEventListener('devicemotion', handleShake);
   }, [gameState.status, handleShake]);
 
-  const handleSelectStall = useCallback((type: StallType) => {
-    const dm = DeviceMotionEvent as any;
+  // 平台檢測
+  useEffect(() => {
+    const detectedPlatform = detectPlatform();
+    setPlatform(detectedPlatform);
+  }, []);
+
+  const handleSelectStall = useCallback(async (type: StallType) => {
     const startInteraction = () => {
       setGameState(prev => ({ 
         ...prev, 
@@ -113,17 +160,51 @@ const App: React.FC = () => {
       }));
     };
 
-    if (typeof dm !== 'undefined' && typeof dm.requestPermission === 'function') {
-      dm.requestPermission()
-        .then((response: string) => {
-          if (response === 'granted') startInteraction();
-          else alert("未獲神明許可，請手動領受。");
-        })
-        .catch(() => startInteraction());
-    } else {
+    // 情況 1: iOS 平台，使用 requestPermission API
+    if (platform === 'ios' && hasMotionPermissionAPI()) {
+      try {
+        const dm = DeviceMotionEvent as any;
+        const response = await dm.requestPermission();
+        
+        if (response === 'granted') {
+          // 進一步測試傳感器是否真的可用
+          const isAvailable = await testMotionSensor();
+          if (isAvailable) {
+            setSensorAvailable(true);
+            startInteraction();
+          } else {
+            setSensorAvailable(false);
+            alert('传感器无法访问，请检查浏览器设置。');
+          }
+        } else {
+          alert('需要开启运动传感器权限才能使用摇签功能。');
+        }
+      } catch (error) {
+        console.error('权限请求失败:', error);
+        alert('权限请求出错，请稍后重试。');
+      }
+    }
+    
+    // 情況 2: Android 平台，需要用戶手動開啟權限
+    else if (platform === 'android') {
+      // 測試傳感器是否可用
+      const isAvailable = await testMotionSensor();
+      
+      if (isAvailable) {
+        setSensorAvailable(true);
+        startInteraction();
+      } else {
+        setSensorAvailable(false);
+        setShowPermissionGuide(true); // 顯示權限指引
+      }
+    }
+    
+    // 情況 3: 桌面瀏覽器，直接進入（使用直接領取按鈕）
+    else {
+      setSensorAvailable(false);
       startInteraction();
     }
-  }, []);
+  }, [platform]);
 
   const handleFinish = useCallback(() => {
     setGameState(prev => ({ ...prev, status: AppState.DISSOLVING }));
@@ -169,12 +250,16 @@ const App: React.FC = () => {
           currentFortune={gameState.currentFortune}
           onConfirm={gameState.status === AppState.INTERACTING ? revealFortune : handleFinish}
           onCancel={handleCancel}
+          showPermissionGuide={showPermissionGuide}
+          onClosePermissionGuide={() => setShowPermissionGuide(false)}
+          platform={platform}
         />
       </div>
 
       {/* 調試控制台 */}
-      <div id="debug-console" className="fixed bottom-4 left-4 text-[9px] text-white/5 pointer-events-none font-mono tracking-widest uppercase">
-        Connection established | {gameState.status}
+      <div id="debug-console" className="fixed bottom-4 left-4 text-[9px] text-white/5 pointer-events-none font-mono tracking-widest uppercase space-y-1">
+        <div>Platform: {platform} | Status: {gameState.status}</div>
+        <div>Sensor: {sensorAvailable === null ? 'untested' : sensorAvailable ? 'available' : 'unavailable'}</div>
       </div>
     </div>
   );

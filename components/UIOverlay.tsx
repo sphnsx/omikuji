@@ -8,6 +8,9 @@ interface UIOverlayProps {
   currentFortune: OmikujiFortune | null;
   onConfirm: () => void;
   onCancel: () => void;
+  showPermissionGuide: boolean;
+  onClosePermissionGuide: () => void;
+  platform: 'ios' | 'android' | 'desktop';
 }
 
 export const UIOverlay: React.FC<UIOverlayProps> = ({ 
@@ -15,7 +18,10 @@ export const UIOverlay: React.FC<UIOverlayProps> = ({
   activeStall, 
   currentFortune, 
   onConfirm, 
-  onCancel
+  onCancel,
+  showPermissionGuide,
+  onClosePermissionGuide,
+  platform
 }) => {
   const [showDivine] = useState(false); // Note: Original code used a state, but for the sake of the requested UI fix, I'll ensure the button/text logic is robust
   const [isDivineVisible, setIsDivineVisible] = useState(false);
@@ -44,6 +50,63 @@ export const UIOverlay: React.FC<UIOverlayProps> = ({
   return (
     <div className="fixed inset-0 pointer-events-none flex items-center justify-center z-50">
       
+      {/* Android 權限指引彈窗 */}
+      {showPermissionGuide && platform === 'android' && (
+        <div className="pointer-events-auto fixed inset-0 bg-black/98 backdrop-blur-3xl flex items-center justify-center z-[100] animate-unfold">
+          <div className="bg-[#08080c] border border-white/10 p-8 sm:p-12 max-w-lg mx-4 space-y-8">
+            
+            {/* 標題 */}
+            <div className="space-y-2 text-center">
+              <div className="text-[9px] text-white/20 tracking-[1em] uppercase font-light pl-[1em]">Permission Required</div>
+              <h2 className="text-2xl font-serif text-white/95 tracking-[0.4em] pl-[0.4em]">需要开启传感器权限</h2>
+            </div>
+
+            {/* 說明文字 */}
+            <div className="text-sm text-white/60 leading-relaxed space-y-4 font-light">
+              <p>Chrome 浏览器需要手动开启运动传感器权限才能使用摇签功能。</p>
+              <p className="text-white/40 text-xs">请按照以下步骤操作：</p>
+            </div>
+
+            {/* 步驟列表 */}
+            <ol className="space-y-4 text-sm text-white/70 font-light">
+              <li className="flex gap-3">
+                <span className="text-white/40 shrink-0">1.</span>
+                <span>点击地址栏左侧的 <strong className="text-white/90">锁形图标</strong></span>
+              </li>
+              <li className="flex gap-3">
+                <span className="text-white/40 shrink-0">2.</span>
+                <span>找到 <strong className="text-white/90">"运动和方向"</strong> 或 <strong className="text-white/90">"运动传感器"</strong> 选项</span>
+              </li>
+              <li className="flex gap-3">
+                <span className="text-white/40 shrink-0">3.</span>
+                <span>将其设置为 <strong className="text-white/90">"允许"</strong></span>
+              </li>
+              <li className="flex gap-3">
+                <span className="text-white/40 shrink-0">4.</span>
+                <span>刷新页面后重新进入</span>
+              </li>
+            </ol>
+
+            {/* 底部按鈕組 */}
+            <div className="space-y-3 pt-4">
+              <button
+                onClick={() => window.location.reload()}
+                className="w-full py-4 border border-white/20 bg-white/5 text-white/80 hover:bg-white/10 hover:border-white/30 tracking-[0.3em] text-sm font-serif transition-all duration-300 pl-[0.3em]"
+              >
+                我已开启，刷新页面
+              </button>
+              
+              <button
+                onClick={onClosePermissionGuide}
+                className="w-full py-3 text-xs text-white/30 hover:text-white/60 tracking-[0.6em] transition-colors pl-[0.6em]"
+              >
+                暂时返回
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* 搖晃提示 (Interaction Phase) */}
       {isInteracting && (
         <div 
@@ -58,6 +121,21 @@ export const UIOverlay: React.FC<UIOverlayProps> = ({
               <h2 className="text-2xl sm:text-3xl font-serif italic text-white/95 flex flex-row items-center justify-center whitespace-nowrap pl-[0.6em]">
                 <span className="tracking-[0.6em] whitespace-nowrap">「 虔心搖晃 」</span>
               </h2>
+              
+              {/* 桌面瀏覽器提示 */}
+              {platform === 'desktop' && (
+                <div className="text-[9px] text-amber-400/60 tracking-[0.2em] bg-amber-900/10 px-4 py-2 border border-amber-500/20">
+                  桌面浏览器无法使用摇签功能，请直接领取
+                </div>
+              )}
+
+              {/* Android 傳感器不可用提示 */}
+              {platform === 'android' && (
+                <div className="text-[9px] text-orange-400/60 tracking-[0.2em] bg-orange-900/10 px-4 py-2 border border-orange-500/20">
+                  传感器不可用，请点击下方"直接领取"或开启权限后刷新
+                </div>
+              )}
+              
               <p className="text-[10px] text-white/40 tracking-[0.25em] pl-[0.25em]">感應天地，求取神諭</p>
             </div>
           </div>
