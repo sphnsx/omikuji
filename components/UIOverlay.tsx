@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { AppState, OmikujiFortune, StallType } from '../types';
-import { Smartphone, ChevronRight, ChevronLeft, Eye, EyeOff } from 'lucide-react';
+import { Smartphone, ChevronLeft, Eye, EyeOff } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
+import { strings, rankLabels, categoryLabels } from '../i18n';
 
 interface UIOverlayProps {
   status: AppState;
@@ -13,21 +15,24 @@ interface UIOverlayProps {
   platform: 'ios' | 'android' | 'desktop';
 }
 
-export const UIOverlay: React.FC<UIOverlayProps> = ({ 
-  status, 
-  activeStall, 
-  currentFortune, 
-  onConfirm, 
+export const UIOverlay: React.FC<UIOverlayProps> = ({
+  status,
+  activeStall,
+  currentFortune,
+  onConfirm,
   onCancel,
   showPermissionGuide,
   onClosePermissionGuide,
-  platform
+  platform,
 }) => {
-  const [showDivine] = useState(false); // Note: Original code used a state, but for the sake of the requested UI fix, I'll ensure the button/text logic is robust
+  const { language } = useLanguage();
   const [isDivineVisible, setIsDivineVisible] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const isInteracting = status === AppState.INTERACTING;
   const isShowing = status === AppState.SHOWING || status === AppState.DISSOLVING;
+  const t = strings[language];
+  const ranks = rankLabels[language];
+  const categories = categoryLabels[language];
 
   // 當新籤文出現時，重置詳解顯示狀態
   useEffect(() => {
@@ -57,50 +62,47 @@ export const UIOverlay: React.FC<UIOverlayProps> = ({
             
             {/* 標題 */}
             <div className="space-y-2 text-center">
-              <div className="text-[9px] text-white/20 tracking-[1em] uppercase font-light pl-[1em]">Permission Required</div>
-              <h2 className="text-2xl font-serif text-white/95 tracking-[0.4em] pl-[0.4em]">需要开启传感器权限</h2>
+              <div className="text-[9px] text-white/20 tracking-[1em] uppercase font-light pl-[1em]">{t.permissionRequired}</div>
+              <h2 className="text-2xl font-serif text-white/95 tracking-[0.4em] pl-[0.4em]">{t.permissionTitle}</h2>
             </div>
 
-            {/* 說明文字 */}
             <div className="text-sm text-white/60 leading-relaxed space-y-4 font-light">
-              <p>Chrome 浏览器需要手动开启运动传感器权限才能使用摇签功能。</p>
-              <p className="text-white/40 text-xs">请按照以下步骤操作：</p>
+              <p>{t.permissionBody}</p>
+              <p className="text-white/40 text-xs">{t.permissionStepsIntro}</p>
             </div>
 
-            {/* 步驟列表 */}
             <ol className="space-y-4 text-sm text-white/70 font-light">
               <li className="flex gap-3">
                 <span className="text-white/40 shrink-0">1.</span>
-                <span>点击地址栏左侧的 <strong className="text-white/90">锁形图标</strong></span>
+                <span>{t.permissionStep1}</span>
               </li>
               <li className="flex gap-3">
                 <span className="text-white/40 shrink-0">2.</span>
-                <span>找到 <strong className="text-white/90">"运动和方向"</strong> 或 <strong className="text-white/90">"运动传感器"</strong> 选项</span>
+                <span>{t.permissionStep2}</span>
               </li>
               <li className="flex gap-3">
                 <span className="text-white/40 shrink-0">3.</span>
-                <span>将其设置为 <strong className="text-white/90">"允许"</strong></span>
+                <span>{t.permissionStep3}</span>
               </li>
               <li className="flex gap-3">
                 <span className="text-white/40 shrink-0">4.</span>
-                <span>刷新页面后重新进入</span>
+                <span>{t.permissionStep4}</span>
               </li>
             </ol>
 
-            {/* 底部按鈕組 */}
             <div className="space-y-3 pt-4">
               <button
                 onClick={() => window.location.reload()}
                 className="w-full py-4 border border-white/20 bg-white/5 text-white/80 hover:bg-white/10 hover:border-white/30 tracking-[0.3em] text-sm font-serif transition-all duration-300 pl-[0.3em]"
               >
-                我已开启，刷新页面
+                {t.permissionRefresh}
               </button>
-              
+
               <button
                 onClick={onClosePermissionGuide}
                 className="w-full py-3 text-xs text-white/30 hover:text-white/60 tracking-[0.6em] transition-colors pl-[0.6em]"
               >
-                暂时返回
+                {t.permissionBack}
               </button>
             </div>
           </div>
@@ -112,34 +114,32 @@ export const UIOverlay: React.FC<UIOverlayProps> = ({
         <div 
           className="pointer-events-auto bg-black/95 backdrop-blur-3xl p-8 sm:p-12 flex flex-col items-center justify-center border border-white/5 shadow-[0_0_100px_rgba(255,100,200,0.05)] animate-unfold w-full max-w-sm mx-auto"
         >
-          <div className="mb-4 text-[9px] text-white/20 tracking-[1em] uppercase font-light text-center pl-[1em]">Omikuji Devotion</div>
+          <div className="mb-4 text-[9px] text-white/20 tracking-[1em] uppercase font-light text-center pl-[1em]">{t.omikujiDevotion}</div>
           <div className="flex flex-col items-center gap-8 mb-4 w-full">
             <div className="p-5 rounded-full bg-white/5">
               <Smartphone className="w-12 h-12 text-white/40 animate-wiggle" />
             </div>
             <div className="space-y-3 text-center flex flex-col items-center w-full">
               <h2 className="text-2xl sm:text-3xl font-serif italic text-white/95 flex flex-row items-center justify-center whitespace-nowrap pl-[0.6em]">
-                <span className="tracking-[0.6em] whitespace-nowrap">「 虔心搖晃 」</span>
+                <span className="tracking-[0.6em] whitespace-nowrap">{t.shakeDevoutly}</span>
               </h2>
-              
-              {/* 桌面瀏覽器提示 */}
+
               {platform === 'desktop' && (
                 <div className="text-[9px] text-amber-400/60 tracking-[0.2em] bg-amber-900/10 px-4 py-2 border border-amber-500/20">
-                  桌面浏览器无法使用摇签功能，请直接领取
+                  {t.desktopShakeUnavailable}
                 </div>
               )}
 
-              {/* Android 傳感器不可用提示 */}
               {platform === 'android' && (
                 <div className="text-[9px] text-orange-400/60 tracking-[0.2em] bg-orange-900/10 px-4 py-2 border border-orange-500/20">
-                  传感器不可用，请点击下方"直接领取"或开启权限后刷新
+                  {t.androidSensorUnavailable}
                 </div>
               )}
-              
-              <p className="text-[10px] text-white/40 tracking-[0.25em] pl-[0.25em]">感應天地，求取神諭</p>
+
+              <p className="text-[10px] text-white/40 tracking-[0.25em] pl-[0.25em]">{t.senseHeavenEarth}</p>
             </div>
           </div>
-          
+
           <div className="w-full flex justify-center items-center mt-8 mb-8 relative z-50">
             <button
               onClick={onConfirm}
@@ -154,16 +154,16 @@ export const UIOverlay: React.FC<UIOverlayProps> = ({
                   mx-auto
               "
             >
-              <span className="whitespace-nowrap">直接領取</span>
+              <span className="whitespace-nowrap">{t.receiveDirectly}</span>
             </button>
           </div>
 
           <div className="w-full flex flex-col items-center mt-4">
-            <button 
-              onClick={onCancel} 
+            <button
+              onClick={onCancel}
               className="w-full py-2 text-[10px] text-white/20 tracking-[0.6em] hover:text-white/70 pl-[0.6em] transition-colors flex items-center justify-center text-center"
             >
-              [ 暫時離開 ]
+              {t.leaveForNow}
             </button>
           </div>
         </div>
@@ -186,15 +186,15 @@ export const UIOverlay: React.FC<UIOverlayProps> = ({
                 {/* 1. Rank Column */}
                 <div className="flex flex-col items-center justify-start shrink-0 border-l border-white/10 pl-10 sm:pl-16 h-full">
                    <div className="[writing-mode:vertical-rl] [text-orientation:upright] text-6xl sm:text-9xl font-black font-serif text-white/90 tracking-[0.2em]">
-                    {currentFortune.rank}
+                    {ranks[currentFortune.rank]}
                   </div>
                 </div>
 
-                {/* 2. Summary Column (解卦) - 物理豎排標籤，頂端對齊 */}
+                {/* 2. Summary Column (解卦) */}
                 <div className="flex flex-col items-center justify-start h-full gap-8 shrink-0 border-l border-white/10 pl-10 sm:pl-16">
                   <div className="flex flex-col items-center font-serif text-xs text-stone-500 tracking-widest opacity-50">
-                    <span>解</span>
-                    <span className="mt-1">卦</span>
+                    <span>{t.interpretation[0]}</span>
+                    <span className="mt-1">{t.interpretation[1]}</span>
                   </div>
                   <div className="w-[1px] h-10 bg-stone-700 opacity-40 shrink-0"></div>
                   <div className="font-serif text-xl text-stone-300 [writing-mode:vertical-rl] [text-orientation:upright] tracking-[0.5em] leading-relaxed max-h-[60vh] overflow-y-auto scrollbar-hide">
@@ -216,8 +216,8 @@ export const UIOverlay: React.FC<UIOverlayProps> = ({
                       `}
                     >
                       <div className="flex flex-col items-center font-serif text-sm tracking-[1em] translate-x-1.5">
-                        <span>{isDivineVisible ? "收" : "詳"}</span>
-                        <span className="mt-2">{isDivineVisible ? "起" : "解"}</span>
+                        <span>{isDivineVisible ? t.collapse[0] : t.details[0]}</span>
+                        <span className="mt-2">{isDivineVisible ? t.collapse[1] : t.details[1]}</span>
                       </div>
                       <div className="opacity-40">
                         {isDivineVisible ? <EyeOff size={20} /> : <Eye size={20} />}
@@ -234,8 +234,8 @@ export const UIOverlay: React.FC<UIOverlayProps> = ({
                     }`}
                   >
                     <div className="flex flex-col items-center font-serif text-xs text-stone-500 tracking-widest opacity-50 shrink-0">
-                      <span>神</span>
-                      <span className="mt-1">諭</span>
+                      <span>{t.divineMessage[0]}</span>
+                      <span className="mt-1">{t.divineMessage[1]}</span>
                     </div>
                     <div className="w-[1px] h-10 bg-stone-700 opacity-40 shrink-0 group-hover:bg-stone-600 transition-colors"></div>
                     <div className="
@@ -250,16 +250,16 @@ export const UIOverlay: React.FC<UIOverlayProps> = ({
                   </div>
                 </div>
 
-                {/* 4. Categories Grid (五大運勢) - 頂端對齊、灰字略淺 */}
+                {/* 4. Categories Grid */}
                 <div className="flex flex-row-reverse justify-start items-start gap-16 sm:gap-24 h-full py-0 shrink-0 overflow-x-visible">
                   {[
-                    { label: '事業', value: currentFortune.career },
-                    { label: '學問', value: currentFortune.academic },
-                    { label: '姻緣', value: currentFortune.love },
-                    { label: '財富', value: currentFortune.finance },
-                    { label: '健康', value: currentFortune.health }
-                  ].map((item) => (
-                    <div key={item.label} className="flex flex-col items-center justify-start h-full gap-8 group shrink-0 min-w-fit">
+                    { label: categories.career, value: currentFortune.career },
+                    { label: categories.academic, value: currentFortune.academic },
+                    { label: categories.love, value: currentFortune.love },
+                    { label: categories.finance, value: currentFortune.finance },
+                    { label: categories.health, value: currentFortune.health },
+                  ].map((item, i) => (
+                    <div key={i} className="flex flex-col items-center justify-start h-full gap-8 group shrink-0 min-w-fit">
                       <div className="flex flex-col items-center font-serif text-xs text-stone-500 tracking-widest opacity-50 group-hover:text-white/70 transition-colors">
                         <span>{item.label[0]}</span>
                         <span className="mt-1">{item.label[1]}</span>
@@ -281,21 +281,21 @@ export const UIOverlay: React.FC<UIOverlayProps> = ({
               
               {/* Bottom Return Button - 底部留足安全區與留白 */}
               <div className="mt-10 sm:mt-12 shrink-0 border-t border-white/5 pt-8 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
-                <button 
+                <button
                   onClick={onConfirm}
                   className="w-full py-8 sm:py-10 border border-white/5 text-stone-500 hover:text-white/60 hover:bg-white/5 tracking-[4em] text-[10px] uppercase transition-all duration-1000 pl-[4em] flex items-center justify-center text-center rounded-sm"
                 >
-                  歸於虛無
+                  {t.returnToVoid}
                 </button>
               </div>
             </div>
           </section>
 
-          {/* SLIDE 1: THE MYSTERY (RANK & SUMMARY) - 右側，初始顯示 */}
+          {/* SLIDE 1: RANK & SUMMARY */}
           <section className="min-w-full h-full flex flex-col items-center justify-center snap-center px-4 sm:px-12 relative overflow-hidden">
             <div className="flex flex-row-reverse items-center justify-center gap-6 sm:gap-20 w-full max-w-5xl">
               <div className="[writing-mode:vertical-rl] [text-orientation:upright] text-[9rem] sm:text-[14rem] font-black font-serif text-white leading-none tracking-[0.1em] opacity-90 drop-shadow-[0_0_60px_rgba(255,255,255,0.1)] select-none shrink-0">
-                {currentFortune.rank}
+                {ranks[currentFortune.rank]}
               </div>
               <div className="max-h-[60vh] [writing-mode:vertical-rl] [text-orientation:upright] text-stone-300 tracking-[0.5em] font-serif text-sm sm:text-xl leading-relaxed border-l border-white/5 pl-6 sm:pl-16 opacity-80 flex-shrink">
                 {currentFortune.summary}
@@ -303,7 +303,7 @@ export const UIOverlay: React.FC<UIOverlayProps> = ({
             </div>
             <div className="absolute bottom-10 left-0 right-0 flex flex-col items-center gap-2 animate-pulse pointer-events-none">
               <div className="bg-black/40 backdrop-blur-sm px-6 py-2 rounded-full border border-white/5">
-                <div className="text-[10px] tracking-[1em] text-white/50 font-light pl-[1em]">右滑揭示詳解</div>
+                <div className="text-[10px] tracking-[1em] text-white/50 font-light pl-[1em]">{t.swipeForDetails}</div>
               </div>
               <ChevronLeft className="w-5 h-5 text-white/30" />
             </div>

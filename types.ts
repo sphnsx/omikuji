@@ -1,3 +1,4 @@
+export type Language = 'zh-TW' | 'en-GB';
 
 export enum OmikujiRank {
   DAIKICHI = '大吉',

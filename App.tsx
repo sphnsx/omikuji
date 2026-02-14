@@ -3,6 +3,8 @@ import { AppState, GameState, StallType } from './types';
 import { generateFortune } from './services/fortuneService';
 import { ThreeEnvironment } from './components/ThreeEnvironment';
 import { UIOverlay } from './components/UIOverlay';
+import { useLanguage } from './context/LanguageContext';
+import { strings } from './i18n';
 
 // 正式版變量設定
 const SHAKE_THRESHOLD = 20; 
@@ -47,6 +49,7 @@ const testMotionSensor = (): Promise<boolean> => {
 };
 
 const App: React.FC = () => {
+  const { language, setLanguage } = useLanguage();
   const [gameState, setGameState] = useState<GameState>({
     status: AppState.SELECTING,
     activeStall: null,
@@ -174,14 +177,14 @@ const App: React.FC = () => {
             startInteraction();
           } else {
             setSensorAvailable(false);
-            alert('传感器无法访问，请检查浏览器设置。');
+            alert(strings[language].sensorUnavailable);
           }
         } else {
-          alert('需要开启运动传感器权限才能使用摇签功能。');
+          alert(strings[language].sensorDenied);
         }
       } catch (error) {
-        console.error('权限请求失败:', error);
-        alert('权限请求出错，请稍后重试。');
+        console.error('Permission request failed:', error);
+        alert(strings[language].permissionRequestError);
       }
     }
     
@@ -204,7 +207,7 @@ const App: React.FC = () => {
       setSensorAvailable(false);
       startInteraction();
     }
-  }, [platform]);
+  }, [platform, language]);
 
   const handleFinish = useCallback(() => {
     setGameState(prev => ({ ...prev, status: AppState.DISSOLVING }));
@@ -222,21 +225,36 @@ const App: React.FC = () => {
     setGameState(prev => ({ ...prev, status: AppState.SELECTING, activeStall: null }));
   }, []);
 
+  const toggleLanguage = useCallback(() => {
+    setLanguage(language === 'zh-TW' ? 'en-GB' : 'zh-TW');
+  }, [language, setLanguage]);
+
   return (
     <div className="w-full h-full bg-[#020108] relative overflow-hidden select-none">
+      {/* Language toggle — fixed top-right, accessible */}
+      <button
+        type="button"
+        onClick={toggleLanguage}
+        className="fixed top-4 right-4 z-[60] pointer-events-auto py-2 px-3 text-[10px] tracking-widest uppercase text-white/40 hover:text-white/80 border border-white/10 hover:border-white/20 transition-colors rounded-sm"
+        aria-label={language === 'zh-TW' ? 'Switch to English' : '切換至中文'}
+        title={language === 'zh-TW' ? 'English' : '中文'}
+      >
+        {language === 'zh-TW' ? 'English' : '中文'}
+      </button>
+
       {/* 視覺背景部分 */}
       <ThreeEnvironment shaking={isShaking} />
       
       {/* 首頁 */}
       {gameState.status === AppState.SELECTING && (
         <div id="cover-page" className="absolute inset-0 z-10 flex flex-col items-center justify-center space-y-12">
-          <div className="text-white/5 text-[10px] tracking-[2em] uppercase animate-pulse font-light">Shadow Sanctuary</div>
+          <div className="text-white/5 text-[10px] tracking-[2em] uppercase animate-pulse font-light">{strings[language].shadowSanctuary}</div>
           <button 
             id="enter-btn"
             onClick={() => handleSelectStall(StallType.TRADITIONAL)}
             className="group relative cursor-pointer text-white/30 text-[13px] tracking-[3em] uppercase transition-all duration-1000 hover:text-white pl-[3em] whitespace-nowrap"
           >
-            <span className="relative z-10">[ 點擊參拜 ]</span>
+            <span className="relative z-10">{strings[language].enterShrine}</span>
             <div className="absolute inset-0 bg-white/5 scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-1000" />
           </button>
         </div>
